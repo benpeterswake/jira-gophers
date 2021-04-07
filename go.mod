@@ -1,4 +1,4 @@
-module gitlab.com/tmobile/workforce-transformation/onboarding-bootcamps/cohort10/team-gophers/capstone/jira-gophers
+module github.com/benpeterswake/jira-gophers
 
 go 1.15
 
