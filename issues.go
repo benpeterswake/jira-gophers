@@ -1,7 +1,9 @@
 package jira
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/url"
 	"strconv"
@@ -14,6 +16,7 @@ type IssueImpl struct {
 
 type IssueService interface {
 	Search(jql string, options *SearchOptions) ([]Issue, error)
+	Update(key string, timeSpent int) error
 }
 
 // Jira API docs: https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis/jira-rest-api-tutorials/jira-rest-api-example-query-issues
@@ -83,4 +86,42 @@ func (i *IssueImpl) Search(jql string, options *SearchOptions) ([]Issue, error) 
 	}
 	log.Println("[Search] Ending")
 	return v.Issues, nil
+}
+
+func (i *IssueImpl) Update(key string, timeSpent int) error {
+
+	log.Println("[Update] Starting")
+
+	var updateTimeSpent UpdateTimeSpent
+	updateTimeSpent.Fields.TimeSpent = timeSpent
+
+	requestBody, err := json.Marshal(&updateTimeSpent)
+	if err != nil {
+		return err
+	}
+
+	pathWithKey := fmt.Sprintf("rest/api/3/issue/%v", key)
+	u := url.URL{
+		Scheme: i.client.getScheme(),
+		Host: i.client.getBaseURL(),
+		Path: pathWithKey,
+	}
+
+	uv := url.Values{}
+	method := "PUT"
+	u.RawQuery = uv.Encode()
+
+	req, err := i.client.newRequest(method, u.String(), bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+
+	resp, err := i.client.sendRequest(req)
+	if err != nil {
+		return err
+	}
+
+	log.Println(resp)
+	log.Println("[Update] Ending")
+	return nil
 }
