@@ -1,8 +1,6 @@
 package jira
 
 import (
-	"io"
-	"net/http"
 	"time"
 
 	"gopkg.in/retry.v1"
@@ -21,14 +19,6 @@ type client struct {
 }
 
 type Client interface {
-	NewRequest(method string, url string, body io.Reader) (*http.Request, error)
-	SendRequest(req *http.Request) (*http.Response, error)
-	GetBaseURL() string
-	GetAuthUrl() string
-	GetScheme() string
-	GetClientID() string
-	GetClientSecret() string
-	GetRedirectURL() string
 	GetAuthService() AuthService
 	GetIssueService() IssueService
 }
@@ -55,27 +45,27 @@ func NewClient(domain string, authDomain string, scheme string, clientID string,
 	return c
 }
 
-func (c *client) GetBaseURL() string {
+func (c *client) getBaseURL() string {
 	return c.baseURL
 }
 
-func (c *client) GetAuthUrl() string {
+func (c *client) getAuthUrl() string {
 	return c.authURL
 }
 
-func (c *client) GetScheme() string {
+func (c *client) getScheme() string {
 	return c.scheme
 }
 
-func (c *client) GetClientID() string {
+func (c *client) getClientID() string {
 	return c.clientID
 }
 
-func (c *client) GetClientSecret() string {
+func (c *client) getClientSecret() string {
 	return c.clientSecret
 }
 
-func (c *client) GetRedirectURL() string {
+func (c *client) getRedirectURL() string {
 	return c.redirectURI
 }
 

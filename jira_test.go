@@ -11,7 +11,7 @@ var (
 	testMux *http.ServeMux
 
 	// testClient is the Jira client being tested.
-	testClient Client
+	testClient *client
 
 	// testServer is a test HTTP server used to provide mock API responses.
 	testServer *httptest.Server
@@ -25,7 +25,18 @@ func setup() {
 	testServer = httptest.NewServer(testMux)
 
 	addr := strings.ReplaceAll(testServer.URL, "http://", "")
-	testClient = NewClient(addr, addr, "http", "test", "test", "test")
+	testClient = &client{
+		addr,
+		addr,
+		"http",
+		"test",
+		"test",
+		"test",
+		nil,
+		nil,
+	}
+	testClient.authService = &AuthImpl{testClient, "", ""}
+	testClient.issueService = &IssueImpl{testClient}
 }
 
 // teardown closes the test HTTP server.

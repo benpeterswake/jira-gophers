@@ -24,8 +24,8 @@ func (i *IssueImpl) Search(jql string, options *SearchOptions) ([]Issue, error) 
 	for attempt := attempts.Start(nil); attempt.Next(); {
 		log.Println("[Search] Starting Attempt:" + strconv.FormatInt(int64(attempt.Count()), 10))
 		u := url.URL{
-			Scheme: i.client.GetScheme(),
-			Host:   i.client.GetBaseURL(),
+			Scheme: i.client.getScheme(),
+			Host:   i.client.getBaseURL(),
 			Path:   "rest/api/3/search",
 		}
 		uv := url.Values{}
@@ -54,12 +54,12 @@ func (i *IssueImpl) Search(jql string, options *SearchOptions) ([]Issue, error) 
 		method := "GET"
 		u.RawQuery = uv.Encode()
 
-		req, err := i.client.NewRequest(method, u.String(), nil)
+		req, err := i.client.newRequest(method, u.String(), nil)
 		if err != nil {
 			return nil, err
 		}
 
-		resp, err := i.client.SendRequest(req)
+		resp, err := i.client.sendRequest(req)
 		if err != nil {
 			return nil, err
 		}

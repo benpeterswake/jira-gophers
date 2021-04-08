@@ -27,13 +27,13 @@ func TestSendRequest(t *testing.T) {
 	})
 
 	method := http.MethodGet
-	url := testClient.GetScheme() + "://" + testClient.GetBaseURL() + "/issues"
-	req, err := testClient.NewRequest(method, url, nil)
+	url := testClient.getScheme() + "://" + testClient.getBaseURL() + "/issues"
+	req, err := testClient.newRequest(method, url, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	resp, err := testClient.SendRequest(req)
+	resp, err := testClient.sendRequest(req)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -47,7 +47,7 @@ func TestNewRequest(t *testing.T) {
 	method := http.MethodGet
 	url := "https://example.com"
 
-	req, err := testClient.NewRequest(method, url, nil)
+	req, err := testClient.newRequest(method, url, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

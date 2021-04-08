@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func (c *client) NewRequest(method string, url string, body io.Reader) (*http.Request, error) {
+func (c *client) newRequest(method string, url string, body io.Reader) (*http.Request, error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		log.Println(err)
@@ -20,7 +20,7 @@ func (c *client) NewRequest(method string, url string, body io.Reader) (*http.Re
 	return req, nil
 }
 
-func (c *client) SendRequest(req *http.Request) (*http.Response, error) {
+func (c *client) sendRequest(req *http.Request) (*http.Response, error) {
 	var resp *http.Response
 	log.Println("[SendRequest] Started")
 	for attempt := attempts.Start(nil); attempt.Next(); {

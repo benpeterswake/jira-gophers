@@ -68,8 +68,8 @@ func (c *AuthImpl) SetRefreshToken(refreshToken string) {
 
 func (a *AuthImpl) GetAccessTokenFromAuthorizationCode(code string) (*OAuthResponse, error) {
 	u := url.URL{
-		Scheme: a.client.GetScheme(),
-		Host:   a.client.GetAuthUrl(),
+		Scheme: a.client.getScheme(),
+		Host:   a.client.getAuthUrl(),
 		Path:   "oauth/token",
 	}
 
@@ -77,10 +77,10 @@ func (a *AuthImpl) GetAccessTokenFromAuthorizationCode(code string) (*OAuthRespo
 
 	payload := OAuthRequest{
 		GrantType:    "authorization_code",
-		ClientID:     a.client.GetClientID(),
-		ClientSecret: a.client.GetClientSecret(),
+		ClientID:     a.client.getClientID(),
+		ClientSecret: a.client.getClientSecret(),
 		Code:         code,
-		RedirectURI:  a.client.GetRedirectURL(),
+		RedirectURI:  a.client.getRedirectURL(),
 	}
 
 	requestBody, err := json.Marshal(&payload)
@@ -109,13 +109,13 @@ func (a *AuthImpl) GetAccessTokenFromAuthorizationCode(code string) (*OAuthRespo
 	if res.StatusCode != 200 {
 		bytesResp, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			log.Println("Error reading response body" + err.Error())
+			log.Println("[GetAccessTokenFromAuthorizationCode] Error reading response body" + err.Error())
 			return nil, err
 		}
-		log.Println("Error body", string(bytesResp))
-		log.Println("Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
+		log.Println("[GetAccessTokenFromAuthorizationCode] Error body", string(bytesResp))
+		log.Println("[GetAccessTokenFromAuthorizationCode] Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
 
-		return nil, errors.New("Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
+		return nil, errors.New("[GetAccessTokenFromAuthorizationCode] Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
 	}
 
 	var resp OAuthResponse
@@ -130,8 +130,8 @@ func (a *AuthImpl) GetAccessTokenFromAuthorizationCode(code string) (*OAuthRespo
 
 func (a *AuthImpl) GetAccessTokenFromRefreshToken() (*OAuthResponse, error) {
 	u := url.URL{
-		Scheme: a.client.GetScheme(),
-		Host:   a.client.GetAuthUrl(),
+		Scheme: a.client.getScheme(),
+		Host:   a.client.getAuthUrl(),
 		Path:   "oauth/token",
 	}
 
@@ -139,8 +139,8 @@ func (a *AuthImpl) GetAccessTokenFromRefreshToken() (*OAuthResponse, error) {
 
 	payload := OAuthRefreshRequest{
 		GrantType:    "refresh_token",
-		ClientID:     a.client.GetClientID(),
-		ClientSecret: a.client.GetClientSecret(),
+		ClientID:     a.client.getClientID(),
+		ClientSecret: a.client.getClientSecret(),
 		RefreshToken: a.refreshToken,
 	}
 
@@ -151,8 +151,6 @@ func (a *AuthImpl) GetAccessTokenFromRefreshToken() (*OAuthResponse, error) {
 	}
 
 	client := &http.Client{}
-
-	log.Println(u.String())
 
 	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -171,12 +169,12 @@ func (a *AuthImpl) GetAccessTokenFromRefreshToken() (*OAuthResponse, error) {
 	if res.StatusCode != 200 {
 		bytesResp, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			log.Println("Error reading response body" + err.Error())
+			log.Println("[GetAccessTokenFromRefreshToken] Error reading response body" + err.Error())
 			return nil, err
 		}
-		log.Println("Error body", string(bytesResp))
-		log.Println("Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
-		return nil, errors.New("Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
+		log.Println("[GetAccessTokenFromRefreshToken] Error body", string(bytesResp))
+		log.Println("[GetAccessTokenFromRefreshToken] Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
+		return nil, errors.New("[GetAccessTokenFromRefreshToken] Error calling jira auth api. Wanted 200 but got code " + strconv.FormatInt(int64(res.StatusCode), 10))
 	}
 
 	var resp OAuthResponse
