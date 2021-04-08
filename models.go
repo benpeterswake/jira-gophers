@@ -530,3 +530,9 @@ type Error struct {
 	StatusCode int
 	Body       map[string]interface{}
 }
+
+type UpdateTimeSpent struct {
+	Fields struct{
+		TimeSpent int `json:"time_spent"`
+	} `json:"fields"`
+}
