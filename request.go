@@ -26,17 +26,18 @@ func (c *client) SendRequest(req *http.Request) (*http.Response, error) {
 	for attempt := attempts.Start(nil); attempt.Next(); {
 		log.Println("[SendRequest] Starting Attempt:" + strconv.FormatInt(int64(attempt.Count()), 10))
 
-		if c.auth.accessToken == "" {
+		if c.GetAuthService().GetAccessToken() == "" {
 			// refresh token
-			authResp, err := c.GetAccessTokenFromRefreshToken(c.auth.refreshToken)
+			log.Println("Token here:", c.GetAuthService().GetRefreshToken())
+			authResp, err := c.GetAuthService().GetAccessTokenFromRefreshToken()
 			if err != nil {
 				log.Println(err)
 				return nil, err
 			}
-			c.SetAuthData(authResp.AccessToken, c.auth.refreshToken)
+			c.GetAuthService().SetAccessToken(authResp.AccessToken)
 		}
 
-		req.Header.Set("Authorization", "Bearer "+c.auth.accessToken)
+		req.Header.Set("Authorization", "Bearer "+c.GetAuthService().GetAccessToken())
 
 		httpClient := http.Client{}
 		var err error
@@ -57,7 +58,7 @@ func (c *client) SendRequest(req *http.Request) (*http.Response, error) {
 			log.Println("Error calling jira api. Wanted 200 but got code " + strconv.FormatInt(int64(resp.StatusCode), 10))
 			// if error is unauthorized retry here
 			if resp.StatusCode == 401 {
-				c.auth.accessToken = ""
+				c.GetAuthService().SetAccessToken("")
 				continue
 			}
 			return nil, errors.New("Error calling jira api. Wanted 200 but got code " + strconv.FormatInt(int64(resp.StatusCode), 10))

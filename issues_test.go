@@ -51,7 +51,7 @@ func TestClient_Search(t *testing.T) {
 		return
 	})
 
-	actual, err := testClient.Search("test", nil)
+	actual, err := testClient.GetIssueService().Search("test", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,6 +12,21 @@ import (
 	"strconv"
 )
 
+type AuthImpl struct {
+	client       *client
+	accessToken  string
+	refreshToken string
+}
+
+type AuthService interface {
+	GetRefreshToken() string
+	GetAccessToken() string
+	SetAccessToken(accessToken string)
+	SetRefreshToken(refreshToken string)
+	GetAccessTokenFromAuthorizationCode(code string) (*OAuthResponse, error)
+	GetAccessTokenFromRefreshToken() (*OAuthResponse, error)
+}
+
 type OAuthRequest struct {
 	GrantType    string `json:"grant_type"`
 	ClientID     string `json:"client_id"`
@@ -35,15 +50,26 @@ type OAuthResponse struct {
 	TokenType    string `json:"token_type"`
 }
 
-func (c *client) SetAuthData(accessToken string, refreshToken string) {
-	c.auth.accessToken = accessToken
-	c.auth.refreshToken = refreshToken
+func (c *AuthImpl) GetRefreshToken() string {
+	return c.refreshToken
 }
 
-func (c *client) GetAccessTokenFromAuthorizationCode(code string) (*OAuthResponse, error) {
+func (c *AuthImpl) GetAccessToken() string {
+	return c.accessToken
+}
+
+func (c *AuthImpl) SetAccessToken(accessToken string) {
+	c.accessToken = accessToken
+}
+
+func (c *AuthImpl) SetRefreshToken(refreshToken string) {
+	c.refreshToken = refreshToken
+}
+
+func (a *AuthImpl) GetAccessTokenFromAuthorizationCode(code string) (*OAuthResponse, error) {
 	u := url.URL{
-		Scheme: c.request.scheme,
-		Host:   c.request.authURL,
+		Scheme: a.client.GetScheme(),
+		Host:   a.client.GetAuthUrl(),
 		Path:   "oauth/token",
 	}
 
@@ -51,10 +77,10 @@ func (c *client) GetAccessTokenFromAuthorizationCode(code string) (*OAuthRespons
 
 	payload := OAuthRequest{
 		GrantType:    "authorization_code",
-		ClientID:     c.credentials.clientID,
-		ClientSecret: c.credentials.clientSecret,
+		ClientID:     a.client.GetClientID(),
+		ClientSecret: a.client.GetClientSecret(),
 		Code:         code,
-		RedirectURI:  c.credentials.redirectURI,
+		RedirectURI:  a.client.GetRedirectURL(),
 	}
 
 	requestBody, err := json.Marshal(&payload)
@@ -63,6 +89,8 @@ func (c *client) GetAccessTokenFromAuthorizationCode(code string) (*OAuthRespons
 	}
 
 	client := &http.Client{}
+
+	log.Println(u.String())
 
 	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -100,10 +128,10 @@ func (c *client) GetAccessTokenFromAuthorizationCode(code string) (*OAuthRespons
 	return &resp, nil
 }
 
-func (c *client) GetAccessTokenFromRefreshToken(refreshToken string) (*OAuthResponse, error) {
+func (a *AuthImpl) GetAccessTokenFromRefreshToken() (*OAuthResponse, error) {
 	u := url.URL{
-		Scheme: c.request.scheme,
-		Host:   c.request.authURL,
+		Scheme: a.client.GetScheme(),
+		Host:   a.client.GetAuthUrl(),
 		Path:   "oauth/token",
 	}
 
@@ -111,9 +139,9 @@ func (c *client) GetAccessTokenFromRefreshToken(refreshToken string) (*OAuthResp
 
 	payload := OAuthRefreshRequest{
 		GrantType:    "refresh_token",
-		ClientID:     c.credentials.clientID,
-		ClientSecret: c.credentials.clientSecret,
-		RefreshToken: refreshToken,
+		ClientID:     a.client.GetClientID(),
+		ClientSecret: a.client.GetClientSecret(),
+		RefreshToken: a.refreshToken,
 	}
 
 	requestBody, err := json.Marshal(&payload)
@@ -123,6 +151,8 @@ func (c *client) GetAccessTokenFromRefreshToken(refreshToken string) (*OAuthResp
 	}
 
 	client := &http.Client{}
+
+	log.Println(u.String())
 
 	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(requestBody))
 	if err != nil {

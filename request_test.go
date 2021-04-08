@@ -27,7 +27,7 @@ func TestSendRequest(t *testing.T) {
 	})
 
 	method := http.MethodGet
-	url := testClient.request.scheme + "://" + testClient.request.baseURL + "/issues"
+	url := testClient.GetScheme() + "://" + testClient.GetBaseURL() + "/issues"
 	req, err := testClient.NewRequest(method, url, nil)
 	if err != nil {
 		t.Fatal(err.Error())
