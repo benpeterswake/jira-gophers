@@ -30,7 +30,7 @@ func TestClient_GetAccessTokenFromRefreshToken(t *testing.T) {
 		return
 	})
 
-	actual, err := testClient.GetAccessTokenFromRefreshToken(refreshToken)
+	actual, err := testClient.GetAuthService().GetAccessTokenFromRefreshToken()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestClient_GetAccessTokenFromAuthorizationCode(t *testing.T) {
 		return
 	})
 
-	actual, err := testClient.GetAccessTokenFromAuthorizationCode(code)
+	actual, err := testClient.GetAuthService().GetAccessTokenFromAuthorizationCode(code)
 	if err != nil {
 		t.Fatal(err)
 	}

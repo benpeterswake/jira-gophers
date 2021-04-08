@@ -8,16 +8,24 @@ import (
 	"strings"
 )
 
+type IssueImpl struct {
+	client *client
+}
+
+type IssueService interface {
+	Search(jql string, options *SearchOptions) ([]Issue, error)
+}
+
 // Jira API docs: https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis/jira-rest-api-tutorials/jira-rest-api-example-query-issues
-func (c *client) Search(jql string, options *SearchOptions) ([]Issue, error) {
+func (i *IssueImpl) Search(jql string, options *SearchOptions) ([]Issue, error) {
 	var v searchResult
 	v.Issues = []Issue{}
 	log.Println("[Search] Starting")
 	for attempt := attempts.Start(nil); attempt.Next(); {
 		log.Println("[Search] Starting Attempt:" + strconv.FormatInt(int64(attempt.Count()), 10))
 		u := url.URL{
-			Scheme: c.request.scheme,
-			Host:   c.request.baseURL,
+			Scheme: i.client.getScheme(),
+			Host:   i.client.getBaseURL(),
 			Path:   "rest/api/3/search",
 		}
 		uv := url.Values{}
@@ -46,12 +54,12 @@ func (c *client) Search(jql string, options *SearchOptions) ([]Issue, error) {
 		method := "GET"
 		u.RawQuery = uv.Encode()
 
-		req, err := c.NewRequest(method, u.String(), nil)
+		req, err := i.client.newRequest(method, u.String(), nil)
 		if err != nil {
 			return nil, err
 		}
 
-		resp, err := c.SendRequest(req)
+		resp, err := i.client.sendRequest(req)
 		if err != nil {
 			return nil, err
 		}
@@ -64,11 +72,11 @@ func (c *client) Search(jql string, options *SearchOptions) ([]Issue, error) {
 		// retry here
 		if len(v.Issues) == 0 {
 			// refresh token
-			resp, err := c.GetAccessTokenFromRefreshToken(c.auth.refreshToken)
+			resp, err := i.client.GetAuthService().GetAccessTokenFromRefreshToken()
 			if err != nil {
 				return nil, err
 			}
-			c.SetAuthData(resp.AccessToken, c.auth.refreshToken)
+			i.client.GetAuthService().SetAccessToken(resp.AccessToken)
 			continue
 		}
 		break
