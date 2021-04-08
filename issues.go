@@ -16,7 +16,7 @@ type IssueImpl struct {
 
 type IssueService interface {
 	Search(jql string, options *SearchOptions) ([]Issue, error)
-	Update(key string, timeSpent int) error
+	Update(key string, timeSpent string) error
 }
 
 // Jira API docs: https://developer.atlassian.com/jiradev/jira-apis/jira-rest-apis/jira-rest-api-tutorials/jira-rest-api-example-query-issues
@@ -88,36 +88,31 @@ func (i *IssueImpl) Search(jql string, options *SearchOptions) ([]Issue, error) 
 	return v.Issues, nil
 }
 
-func (i *IssueImpl) Update(key string, timeSpent int) error {
+func (i *IssueImpl) Update(key string, timeSpent string) error {
 
 	log.Println("[Update] Starting")
-	var issueUpdate IssueUpdate
 
-	var issueTimeTrackingUpdate []TimeTrackingUpdate
-	timeTrackingUpdate := TimeTrackingUpdate{
-		Edit: TimeTrackingEdit{
-			TimeSpent: "1h",
-		},
-	}
+	pathWithKey := fmt.Sprintf("rest/api/3/issue/%v/worklog", key)
 
-	issueTimeTrackingUpdate = append(issueTimeTrackingUpdate, timeTrackingUpdate)
-	issueUpdate.Update.TimeTracking = issueTimeTrackingUpdate
-
-	requestBody, err := json.Marshal(&issueUpdate)
-	if err != nil {
-		return err
-	}
-
-	pathWithKey := fmt.Sprintf("rest/api/3/issue/%v", key)
+	log.Println("path", pathWithKey)
 	u := url.URL{
 		Scheme: i.client.getScheme(),
-		Host: i.client.getBaseURL(),
-		Path: pathWithKey,
+		Host:   i.client.getBaseURL(),
+		Path:   pathWithKey,
 	}
 
 	uv := url.Values{}
-	method := "PUT"
+	method := "POST"
 	u.RawQuery = uv.Encode()
+
+	var workLog WorkLog
+
+	workLog.TimeSpent = timeSpent
+
+	requestBody, err := json.Marshal(&workLog)
+	if err != nil {
+		return err
+	}
 
 	req, err := i.client.newRequest(method, u.String(), bytes.NewBuffer(requestBody))
 	if err != nil {

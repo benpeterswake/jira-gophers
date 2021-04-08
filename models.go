@@ -531,22 +531,6 @@ type Error struct {
 	Body       map[string]interface{}
 }
 
-type IssueTimeTrackingUpdate struct {
-	TimeTracking []TimeTrackingUpdate `json:"timetracking"`
+type WorkLog struct {
+	TimeSpent string `json:"timeSpent"`
 }
-
-type TimeTrackingUpdate struct {
-	Edit TimeTrackingEdit `json:"edit"`
-}
-
-type TimeTrackingEdit struct {
-	OriginalEstimate string`json:"originalEstimate,omitempty" structs:"originalEstimate,omitempty"`
-	RemainingEstimate string`json:"remainingEstimate,omitempty" structs:"remainingEstimate,omitempty"`
-	TimeSpent string`json:"timeSpent,omitempty" structs:"timeSpent,omitempty"`
-}
-
-type IssueUpdate struct {
-	Update IssueTimeTrackingUpdate `json:"update"`
-}
-
-

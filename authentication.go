@@ -20,9 +20,9 @@ type AuthImpl struct {
 
 type AuthService interface {
 	GetRefreshToken() string
+	SetRefreshToken(refreshToken string)
 	GetAccessToken() string
 	SetAccessToken(accessToken string)
-	SetRefreshToken(refreshToken string)
 	GetAccessTokenFromAuthorizationCode(code string) (*OAuthResponse, error)
 	GetAccessTokenFromRefreshToken() (*OAuthResponse, error)
 }
@@ -89,8 +89,6 @@ func (a *AuthImpl) GetAccessTokenFromAuthorizationCode(code string) (*OAuthRespo
 	}
 
 	client := &http.Client{}
-
-	log.Println(u.String())
 
 	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(requestBody))
 	if err != nil {

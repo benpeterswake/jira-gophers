@@ -28,7 +28,6 @@ func (c *client) sendRequest(req *http.Request) (*http.Response, error) {
 
 		if c.GetAuthService().GetAccessToken() == "" {
 			// refresh token
-			log.Println("Token here:", c.GetAuthService().GetRefreshToken())
 			authResp, err := c.GetAuthService().GetAccessTokenFromRefreshToken()
 			if err != nil {
 				log.Println(err)
@@ -47,7 +46,7 @@ func (c *client) sendRequest(req *http.Request) (*http.Response, error) {
 			return nil, err
 		}
 
-		if resp.StatusCode >= 400  {
+		if resp.StatusCode >= 400 {
 			bytesResp, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				log.Println("Error reading response body" + err.Error())
