@@ -91,11 +91,19 @@ func (i *IssueImpl) Search(jql string, options *SearchOptions) ([]Issue, error) 
 func (i *IssueImpl) Update(key string, timeSpent int) error {
 
 	log.Println("[Update] Starting")
+	var issueUpdate IssueUpdate
 
-	var updateTimeSpent UpdateTimeSpent
-	updateTimeSpent.Fields.TimeSpent = timeSpent
+	var issueTimeTrackingUpdate []TimeTrackingUpdate
+	timeTrackingUpdate := TimeTrackingUpdate{
+		Edit: TimeTrackingEdit{
+			TimeSpent: "1h",
+		},
+	}
 
-	requestBody, err := json.Marshal(&updateTimeSpent)
+	issueTimeTrackingUpdate = append(issueTimeTrackingUpdate, timeTrackingUpdate)
+	issueUpdate.Update.TimeTracking = issueTimeTrackingUpdate
+
+	requestBody, err := json.Marshal(&issueUpdate)
 	if err != nil {
 		return err
 	}

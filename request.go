@@ -47,7 +47,7 @@ func (c *client) sendRequest(req *http.Request) (*http.Response, error) {
 			return nil, err
 		}
 
-		if resp.StatusCode != 200 {
+		if resp.StatusCode >= 400  {
 			bytesResp, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				log.Println("Error reading response body" + err.Error())
